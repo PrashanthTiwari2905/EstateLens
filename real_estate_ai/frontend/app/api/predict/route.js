@@ -13,7 +13,8 @@ export async function POST(req) {
     }
 
     const houseData = await req.json();
-    const ML_API_URL = process.env.ML_API_URL || "http://localhost:8000";
+    let ML_API_URL = process.env.ML_API_URL || "http://localhost:8000";
+    ML_API_URL = ML_API_URL.replace(/\/$/, "");
 
     // 1. Call ML API
     let predictionResult;
