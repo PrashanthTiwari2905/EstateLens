@@ -68,7 +68,8 @@ export default function Dashboard() {
       const res = await axios.post("/api/predict", formData);
       setPrediction(res.data);
     } catch (err) {
-      alert("Prediction service error. Is the ML API running?");
+      const msg = err.response?.data?.error || "Prediction service error. Is the ML API running?";
+      alert(msg);
     } finally {
       setLoading(false);
     }
