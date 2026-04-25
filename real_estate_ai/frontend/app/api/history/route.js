@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
-import { connectDB, Prediction } from "../../../lib/mongodb";
+import { connectDB, Prediction } from "@/lib/mongodb";
 
 export async function GET() {
   try {
