@@ -55,7 +55,8 @@ wheels/
 *.egg
 .pytest_cache/
 
-# ML Artifacts (Large binary files)
-*.pkl
-*.joblib
+# Models and Data
+# *.pkl (Removing this to allow model deployment)
+*.db
+joblib
 data/*.csv
