@@ -1,11 +1,5 @@
 import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI ? process.env.MONGODB_URI.trim() : null;
-
-if (!MONGODB_URI || (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://'))) {
-  throw new Error('Invalid or missing MONGODB_URI. Must start with "mongodb://" or "mongodb+srv://"');
-}
-
 let cached = global.mongoose
 
 if (!cached) {
@@ -13,6 +7,12 @@ if (!cached) {
 }
 
 async function connectDB() {
+  const MONGODB_URI = process.env.MONGODB_URI ? process.env.MONGODB_URI.trim() : null;
+
+  if (!MONGODB_URI || (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://'))) {
+    throw new Error('Invalid or missing MONGODB_URI in environment variables.');
+  }
+
   if (cached.conn) return cached.conn
 
   if (!cached.promise) {
