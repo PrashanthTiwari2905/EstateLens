@@ -19,12 +19,14 @@ export async function POST(req) {
     // 1. Call ML API
     let predictionResult;
     try {
-      const mlResponse = await axios.post(`${ML_API_URL}/predict`, houseData);
+      const mlResponse = await axios.post(`${ML_API_URL}/predict`, houseData, {
+        timeout: 60000 // 60s timeout for Render free tier wake up
+      });
       predictionResult = mlResponse.data;
     } catch (mlError) {
-      console.error("ML API Error:", mlError.message);
+      console.error("ML API Error:", mlError.response?.data || mlError.message);
       return NextResponse.json(
-        { error: "ML Service is currently unavailable" },
+        { error: `ML Service Error: ${mlError.message}. Target: ${ML_API_URL}` },
         { status: 503 }
       );
     }
