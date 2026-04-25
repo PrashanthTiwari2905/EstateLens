@@ -20,8 +20,9 @@ async function connectDB() {
   const MONGODB_URI = rawUri.trim().replace(/^["'](.+)["']$/, '$1');
 
   if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
-    console.error("FORMAT ERROR: URI starts with:", MONGODB_URI.substring(0, 10));
-    throw new Error('Invalid database link format. It must start with mongodb+srv://');
+    const diagnostic = MONGODB_URI.substring(0, 15);
+    console.error("FORMAT ERROR: URI starts with:", diagnostic);
+    throw new Error(`Invalid database link format. I see: "${diagnostic}...". It must start with mongodb+srv://`);
   }
 
   if (cached.conn) return cached.conn
