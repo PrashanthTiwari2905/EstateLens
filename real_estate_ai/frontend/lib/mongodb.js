@@ -7,16 +7,20 @@ if (!cached) {
 }
 
 async function connectDB() {
-  const MONGODB_URI = process.env.MONGODB_URI ? process.env.MONGODB_URI.trim() : null;
+  // Only execute on server
+  if (typeof window !== 'undefined') return;
 
-  if (!MONGODB_URI || (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://'))) {
-    throw new Error('Invalid or missing MONGODB_URI in environment variables.');
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  if (!MONGODB_URI) {
+    console.error("CRITICAL: MONGODB_URI is missing from environment variables.");
+    throw new Error('Database configuration error.');
   }
 
   if (cached.conn) return cached.conn
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
+    cached.promise = mongoose.connect(MONGODB_URI.trim(), {
       bufferCommands: false,
     }).then((mongoose) => mongoose)
   }
