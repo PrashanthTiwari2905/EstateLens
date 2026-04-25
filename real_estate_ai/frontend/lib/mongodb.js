@@ -7,20 +7,27 @@ if (!cached) {
 }
 
 async function connectDB() {
-  // Only execute on server
   if (typeof window !== 'undefined') return;
 
-  const MONGODB_URI = process.env.MONGODB_URI;
+  let rawUri = process.env.MONGODB_URI;
 
-  if (!MONGODB_URI) {
-    console.error("CRITICAL: MONGODB_URI is missing from environment variables.");
+  if (!rawUri) {
+    console.error("CRITICAL: MONGODB_URI is missing.");
     throw new Error('Database configuration error.');
+  }
+
+  // SMART CLEANING: Remove quotes, spaces, or invisible characters
+  const MONGODB_URI = rawUri.trim().replace(/^["'](.+)["']$/, '$1');
+
+  if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
+    console.error("FORMAT ERROR: URI starts with:", MONGODB_URI.substring(0, 10));
+    throw new Error('Invalid database link format. It must start with mongodb+srv://');
   }
 
   if (cached.conn) return cached.conn
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI.trim(), {
+    cached.promise = mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
     }).then((mongoose) => mongoose)
   }
