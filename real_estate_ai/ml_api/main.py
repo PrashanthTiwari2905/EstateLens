@@ -36,26 +36,34 @@ else:
 
 # --- DATA MODELS ---
 class HouseInput(BaseModel):
-    crime_rate: float
-    avg_rooms: float
-    house_age: float
-    distance_to_work: float
-    tax_rate: float
-    school_ratio: float
-    low_income_percent: float
+    crim: float
+    rm: float
+    age: float
+    dis: float
+    tax: float
+    ptratio: float
+    lstat: float
 
 class PredictionOutput(BaseModel):
     predicted_price: float
-    confidence_low: float
-    confidence_high: float
+    confidence_range: List[float]
     top_factors: List[str]
     model_version: str
 
 # --- BUSINESS LOGIC ---
 def preprocess(data: HouseInput) -> pd.DataFrame:
     """Ensures input matches the feature ordering required by the model."""
-    df = pd.DataFrame([data.dict()])
-    # Ensure column order matches training
+    # Map back to feature names if necessary
+    input_dict = {
+        "crime_rate": data.crim,
+        "avg_rooms": data.rm,
+        "house_age": data.age,
+        "distance_to_work": data.dis,
+        "tax_rate": data.tax,
+        "school_ratio": data.ptratio,
+        "low_income_percent": data.lstat
+    }
+    df = pd.DataFrame([input_dict])
     df = df[feature_names]
     return df
 
@@ -63,7 +71,6 @@ def generate_explanations(df: pd.DataFrame) -> List[str]:
     """Generates human-readable SHAP factor strings."""
     shap_values = explainer.shap_values(df)[0]
     
-    # Pair feature names, values, and SHAP impacts
     feature_impacts = []
     for i, name in enumerate(feature_names):
         val = df[name].values[0]
@@ -75,14 +82,15 @@ def generate_explanations(df: pd.DataFrame) -> List[str]:
             "abs_impact": abs(impact)
         })
     
-    # Sort by absolute impact and take top 3
     top_3 = sorted(feature_impacts, key=lambda x: x["abs_impact"], reverse=True)[:3]
     
     factors = []
     for f in top_3:
         emoji = "✅" if f["impact"] > 0 else "❌"
         verb = "increased" if f["impact"] > 0 else "decreased"
-        factors.append(f"{emoji} {f['name']} ({f['value']:.2f}) {verb} the price")
+        # Clean up names for display
+        clean_name = f["name"].replace("_", " ").title()
+        factors.append(f"{emoji} {clean_name} ({f['value']:.2f}) {verb} the price")
         
     return factors
 
@@ -96,7 +104,7 @@ async def health():
         "artifacts_loaded": model is not None
     }
 
-@app.post("/predict", response_model=PredictionOutput)
+@app.post("/predict/price", response_model=PredictionOutput)
 async def predict(data: HouseInput):
     if model is None:
         raise HTTPException(status_code=500, detail="Inference model not initialized.")
@@ -106,20 +114,20 @@ async def predict(data: HouseInput):
         df = preprocess(data)
         
         # Prediction (values are in $1000s in original dataset)
-        raw_price = model.predict(df)[0]
-        final_price = float(raw_price * 1000)
+        raw_price = float(model.predict(df)[0])
         
-        # Confidence Range (requested 92% to 108%)
-        low = final_price * 0.92
-        high = final_price * 1.08
+        # Confidence Range (simplified +/- 8%)
+        confidence_range = [
+            raw_price * 0.92,
+            raw_price * 1.08
+        ]
         
         # Explainability
         factors = generate_explanations(df)
         
         return {
-            "predicted_price": round(final_price, 2),
-            "confidence_low": round(low, 2),
-            "confidence_high": round(high, 2),
+            "predicted_price": raw_price,
+            "confidence_range": confidence_range,
             "top_factors": factors,
             "model_version": "1.0"
         }
