@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+export const dynamic = "force-dynamic";
 import { getServerSession } from "next-auth/next";
 import axios from "axios";
 import { authOptions } from "../auth/[...nextauth]/route";
