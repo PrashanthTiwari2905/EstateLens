@@ -33,7 +33,7 @@ export async function POST(req) {
     let predictionResult;
     try {
       const mlResponse = await axios.post(`${ML_API_URL}/predict/price`, mappedData, {
-        timeout: 60000 
+        timeout: 120000 // 120s for Render free tier wake up
       });
       
       // CONVERT TO RUPEES (Assuming model output is in $1000s and $1 = ₹83)
