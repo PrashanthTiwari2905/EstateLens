@@ -12,26 +12,33 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        await connectDB();
-
-        // 1. Find user in MongoDB
-        const user = await User.findOne({ email: credentials.email });
-        if (!user) {
-          throw new Error("No user found with this email.");
+        try {
+          await connectDB();
+  
+          // 1. Find user in MongoDB
+          const user = await User.findOne({ email: credentials.email });
+          if (!user) {
+            console.error("Auth Error: No user found with email", credentials.email);
+            throw new Error("No user found with this email.");
+          }
+  
+          // 2. Verify password
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+          if (!isValid) {
+            console.error("Auth Error: Invalid password for", credentials.email);
+            throw new Error("Invalid password. Please try again.");
+          }
+  
+          // 3. Return user object to NextAuth
+          return {
+            id: user._id.toString(),
+            name: user.full_name,
+            email: user.email,
+          };
+        } catch (error) {
+          console.error("CRITICAL AUTH ERROR:", error.message);
+          throw error;
         }
-
-        // 2. Verify password
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) {
-          throw new Error("Invalid password. Please try again.");
-        }
-
-        // 3. Return user object to NextAuth
-        return {
-          id: user._id.toString(),
-          name: user.full_name,
-          email: user.email,
-        };
       },
     }),
   ],
