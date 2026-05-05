@@ -11,3 +11,6 @@ numpy
 bcrypt
 python-jose[cryptography]
 passlib[bcrypt]
+dnspython
+motor
+email-validator

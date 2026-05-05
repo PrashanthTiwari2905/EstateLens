@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
 from ..schemas.house_schema import HouseInput, PredictionOutput
 from ..services.prediction_service import prediction_service
 from ..services.explain_service import explain_service
@@ -9,7 +10,7 @@ from datetime import datetime
 router = APIRouter()
 
 @router.post("/price", response_model=PredictionOutput)
-async def predict_price(data: HouseInput, current_user: dict = Depends(get_current_user)):
+async def predict_price(data: HouseInput):
     # 1. Get Prediction
     result = prediction_service.predict_price(data.dict())
     if "error" in result:
@@ -25,16 +26,6 @@ async def predict_price(data: HouseInput, current_user: dict = Depends(get_curre
         top_factors=factors,
         model_version=result["model_version"]
     )
-    
-    # 4. Save to History (MongoDB)
-    prediction_record = {
-        "user_email": current_user["sub"],
-        "input_data": data.dict(),
-        "predicted_price": output.predicted_price,
-        "top_factors": output.top_factors,
-        "timestamp": datetime.utcnow()
-    }
-    await db.db.predictions.insert_one(prediction_record)
     
     return output
 

@@ -208,16 +208,16 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 gap-4 mb-6">
                       <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xl shadow-green-900/5 text-center">
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Predicted Value</p>
-                        <h2 className="text-5xl font-black text-green-600">${prediction.predicted_price.toLocaleString()}</h2>
+                        <h2 className="text-5xl font-black text-green-600">₹{prediction.predicted_price.toLocaleString()}</h2>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md">
                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Low Estimate</p>
-                          <p className="text-xl font-bold text-slate-700">${prediction.confidence_low.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-slate-700">₹{prediction.confidence_low.toLocaleString()}</p>
                         </div>
                         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md">
                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">High Estimate</p>
-                          <p className="text-xl font-bold text-slate-700">${prediction.confidence_high.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-slate-700">₹{prediction.confidence_high.toLocaleString()}</p>
                         </div>
                       </div>
                     </div>
@@ -304,7 +304,7 @@ export default function Dashboard() {
                           {new Date(record.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-8 py-6">
-                          <span className="text-lg font-black text-slate-900">${record.predicted_price.toLocaleString()}</span>
+                          <span className="text-lg font-black text-slate-900">₹{record.predicted_price.toLocaleString()}</span>
                         </td>
                         <td className="px-8 py-6">
                            <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${record.top_factors?.[0]?.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

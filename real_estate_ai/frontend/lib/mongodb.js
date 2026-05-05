@@ -28,9 +28,15 @@ async function connectDB() {
   if (cached.conn) return cached.conn
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
+    const opts = {
       bufferCommands: false,
-    }).then((mongoose) => mongoose)
+      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
+      heartbeatFrequencyMS: 2000,
+    };
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log("✅ Successfully connected to MongoDB via Mongoose");
+      return mongoose;
+    });
   }
 
   cached.conn = await cached.promise

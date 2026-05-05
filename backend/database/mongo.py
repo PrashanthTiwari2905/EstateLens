@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "estatelens")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+DB_NAME = os.getenv("DB_NAME", "estatelens")
 
 class MongoDB:
     client: AsyncIOMotorClient = None
@@ -14,9 +14,9 @@ class MongoDB:
 db = MongoDB()
 
 async def connect_to_mongo():
-    db.client = AsyncIOMotorClient(MONGODB_URL)
-    db.db = db.client[DATABASE_NAME]
-    print(f"Connected to MongoDB: {DATABASE_NAME}")
+    db.client = AsyncIOMotorClient(MONGO_URI)
+    db.db = db.client[DB_NAME]
+    print(f"Connected to MongoDB: {DB_NAME}")
 
 async def close_mongo_connection():
     db.client.close()
