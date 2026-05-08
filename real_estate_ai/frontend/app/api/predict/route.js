@@ -14,6 +14,8 @@ export async function POST(req) {
     }
 
     const houseData = await req.json();
+    console.log("📝 Incoming Prediction Request:", houseData);
+
     
     // MAP FRONTEND NAMES TO BACKEND NAMES
     const mappedData = {
@@ -35,6 +37,12 @@ export async function POST(req) {
       const mlResponse = await axios.post(`${ML_API_URL}/predict/price`, mappedData, {
         timeout: 120000 // 120s for Render free tier wake up
       });
+      console.log("🤖 ML API Response received:", mlResponse.data);
+      
+      // Safety check for data
+      if (!mlResponse.data || typeof mlResponse.data.predicted_price === 'undefined') {
+        throw new Error("Invalid response structure from ML service");
+      }
       
       // CONVERT TO RUPEES (Assuming model output is in $1000s and $1 = ₹83)
       const multiplier = 83000;
@@ -55,6 +63,7 @@ export async function POST(req) {
     }
 
     // 2. Save to MongoDB
+    console.log("💾 Attempting to save prediction to MongoDB...");
     await connectDB();
     const newPrediction = await Prediction.create({
       user_email: session.user.email,
@@ -64,6 +73,7 @@ export async function POST(req) {
       confidence_high: predictionResult.confidence_range[1],
       top_factors: predictionResult.top_factors,
     });
+    console.log("✅ Prediction saved successfully with ID:", newPrediction._id);
 
     return NextResponse.json({
       ...predictionResult,
