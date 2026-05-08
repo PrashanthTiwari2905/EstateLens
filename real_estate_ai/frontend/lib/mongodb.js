@@ -9,37 +9,38 @@ if (!cached) {
 async function connectDB() {
   if (typeof window !== 'undefined') return;
 
-  let rawUri = process.env.MONGODB_URI;
+  const MONGODB_URI = process.env.MONGODB_URI;
 
-  if (!rawUri) {
-    console.error("CRITICAL: MONGODB_URI is missing.");
+  if (!MONGODB_URI) {
+    console.error("❌ CRITICAL: MONGODB_URI is missing in .env.local");
     throw new Error('Database configuration error.');
-  }
-
-  // SMART CLEANING: Remove quotes, spaces, or invisible characters
-  const MONGODB_URI = rawUri.trim().replace(/^["'](.+)["']$/, '$1');
-
-  if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
-    const diagnostic = MONGODB_URI.substring(0, 15);
-    console.error("FORMAT ERROR: URI starts with:", diagnostic);
-    throw new Error(`Invalid database link format. I see: "${diagnostic}...". It must start with mongodb+srv://`);
   }
 
   if (cached.conn) return cached.conn
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
-      heartbeatFrequencyMS: 2000,
+      bufferCommands: true,
+      serverSelectionTimeoutMS: 15000,
     };
+    
+    console.log("📡 Attempting to connect to MongoDB...");
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log("✅ Successfully connected to MongoDB via Mongoose");
+      console.log("✅ MongoDB Connected Successfully");
       return mongoose;
+    }).catch(err => {
+      console.error("❌ MongoDB Connection Error:", err.message);
+      cached.promise = null; // Allow retry on next request
+      throw err;
     });
   }
 
-  cached.conn = await cached.promise
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
   return cached.conn
 }
 
