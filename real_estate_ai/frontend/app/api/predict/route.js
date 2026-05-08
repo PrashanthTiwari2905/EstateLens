@@ -81,11 +81,30 @@ export async function POST(req) {
       confidence_high: predictionResult.confidence_range[1],
       id: newPrediction._id,
     });
-  } catch (error) {
-    console.error("Predict Route Error:", error);
+    } catch (error) {
+    console.error("🚨 PREDICT ROUTE CRASH:", error);
+    
+    let errorMessage = "An unexpected error occurred inside the frontend API.";
+    let statusCode = 500;
+
+    if (error.code === 'ECONNABORTED') {
+      errorMessage = "The ML Service took too long to respond (Timeout).";
+      statusCode = 504;
+    } else if (error.response) {
+      errorMessage = `ML Service returned an error: ${error.response.status} - ${JSON.stringify(error.response.data)}`;
+      statusCode = error.response.status;
+    } else if (error.request) {
+      errorMessage = "The ML Service is unreachable. Please check if the backend is running.";
+      statusCode = 503;
+    }
+
     return NextResponse.json(
-      { error: "An internal server error occurred" },
-      { status: 500 }
+      { 
+        error: errorMessage,
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+      },
+      { status: statusCode }
     );
   }
 }

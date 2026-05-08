@@ -61,15 +61,18 @@ export default function Dashboard() {
     }
   };
 
-  const handlePredict = async (e) => {
+    const handlePredict = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setPrediction(null); // Clear old results
     try {
       const res = await axios.post("/api/predict", formData);
       setPrediction(res.data);
     } catch (err) {
-      const msg = err.response?.data?.error || "Prediction service error. Is the ML API running?";
-      alert(msg);
+      console.error("Dashboard Predict Error:", err);
+      const msg = err.response?.data?.error || err.message || "Unknown error";
+      const details = err.response?.data?.details || "";
+      alert(`⚠️ Prediction Failed\n\n${msg}\n${details}`);
     } finally {
       setLoading(false);
     }

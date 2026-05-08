@@ -11,14 +11,19 @@ class ExplainService:
 
     def _init_explainer(self):
         if prediction_service.model:
-            self.explainer = shap.TreeExplainer(prediction_service.model)
+            try:
+                self.explainer = shap.TreeExplainer(prediction_service.model)
+                print("✅ SHAP Explainer initialized successfully")
+            except Exception as e:
+                print(f"⚠️ SHAP initialization failed (Explaining will be disabled): {e}")
+                self.explainer = None
 
     def explain_prediction(self, data: dict) -> list[str]:
         if not self.explainer:
             self._init_explainer()
         
         if not self.explainer:
-            return ["Explanation currently unavailable"]
+            return ["Intelligence factors currently unavailable for this prediction."]
 
         # 1. Preprocess
         X = preprocess_input(data)

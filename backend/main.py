@@ -56,7 +56,8 @@ origins = [
     "http://localhost:5173",           # Vite dev server
     "http://localhost:5174",           # Case where 5173 is busy
     "http://localhost:3000",           # Alternative frontend port
-    "https://your-app.vercel.app",     # Production frontend
+    "https://estate-lens-three.vercel.app", # User's actual production frontend
+    "https://your-app.vercel.app",     # Placeholder
 ]
 
 app.add_middleware(
@@ -82,8 +83,9 @@ async def root():
         "app": "EstateLens AI API",
         "version": "2.0.0",
         "status": "online",
-        "documentation": "/docs",
-        "ml_engine": prediction_service.version
+        "database": "connected" if db.client else "disconnected",
+        "ml_engine": prediction_service.version,
+        "documentation": "/docs"
     }
 
 # --- RUN LOGIC ---
