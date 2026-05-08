@@ -12,9 +12,12 @@ async function connectDB() {
   const MONGODB_URI = process.env.MONGODB_URI;
 
   if (!MONGODB_URI) {
-    console.error("❌ CRITICAL: MONGODB_URI is missing in .env.local");
-    throw new Error('Database configuration error.');
+    console.error("❌ CRITICAL ERROR: process.env.MONGODB_URI is UNDEFINED in this environment.");
+    console.log("Current Environment Variables Found:", Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('KEY')));
+    throw new Error('Database configuration error: MONGODB_URI is missing in Vercel settings.');
   }
+
+  console.log(`📡 Database URI found. Length: ${MONGODB_URI.length} chars. Starts with: ${MONGODB_URI.substring(0, 10)}...`);
 
   if (cached.conn) return cached.conn
 
