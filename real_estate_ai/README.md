@@ -1,5 +1,12 @@
 # EstateLens AI - Full-Stack Property Valuation Platform
 
+## 🚀 Deployment Note: MongoDB DNS Fix
+If you encounter `querySrv ETIMEOUT` errors during deployment, use the **Direct Connection String** instead of the `+srv` format. This bypasses DNS resolution issues common on some hosting providers.
+
+**Required Environment Variables:**
+- `MONGODB_URI` (Frontend) & `MONGO_URI` (Backend):
+  `mongodb://estate:estate123@ac-oit7elx-shard-00-00.uaeookh.mongodb.net:27017,ac-oit7elx-shard-00-01.uaeookh.mongodb.net:27017,ac-oit7elx-shard-00-02.uaeookh.mongodb.net:27017/real_estate_db?ssl=true&replicaSet=atlas-grn8z9-shard-0&authSource=admin&retryWrites=true&w=majority`
+
 EstateLens is a professional, decoupled house price prediction platform built with **Next.js 14**, **FastAPI**, and **Random Forest Regression**. It features a modern SaaS UI, secure JWT authentication, and SHAP-based AI explainability.
 
 ## 🚀 Live Access
