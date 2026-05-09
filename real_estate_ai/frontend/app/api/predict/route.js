@@ -63,24 +63,31 @@ export async function POST(req) {
       );
     }
 
-    // 2. Save to MongoDB
-    console.log("💾 Attempting to save prediction to MongoDB...");
-    await connectDB();
-    const newPrediction = await Prediction.create({
-      user_email: session.user.email,
-      input_features: houseData,
-      predicted_price: predictionResult.predicted_price,
-      confidence_low: predictionResult.confidence_range[0],
-      confidence_high: predictionResult.confidence_range[1],
-      top_factors: predictionResult.top_factors,
-    });
-    console.log("✅ Prediction saved successfully with ID:", newPrediction._id);
+    // 2. Save to MongoDB (Non-critical: don't crash if save fails)
+    let predictionId = null;
+    try {
+      console.log("💾 Attempting to save prediction to MongoDB...");
+      await connectDB();
+      const newPrediction = await Prediction.create({
+        user_email: session.user.email,
+        input_features: houseData,
+        predicted_price: predictionResult.predicted_price,
+        confidence_low: predictionResult.confidence_range[0],
+        confidence_high: predictionResult.confidence_range[1],
+        top_factors: predictionResult.top_factors,
+      });
+      predictionId = newPrediction._id;
+      console.log("✅ Prediction saved successfully with ID:", predictionId);
+    } catch (saveError) {
+      console.error("⚠️ Failed to save prediction to MongoDB (ignoring to show result):", saveError.message);
+    }
 
     return NextResponse.json({
       ...predictionResult,
       confidence_low: predictionResult.confidence_range[0],
       confidence_high: predictionResult.confidence_range[1],
-      id: newPrediction._id,
+      id: predictionId,
+      save_status: predictionId ? "success" : "failed"
     });
     } catch (error) {
     console.error("🚨 PREDICT ROUTE CRASH:", error);
