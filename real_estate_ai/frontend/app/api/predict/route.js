@@ -21,6 +21,7 @@ export async function POST(req) {
     const mappedData = {
       crim: houseData.crime_rate,
       rm: houseData.avg_rooms,
+      sqft: houseData.sqft,
       age: houseData.house_age,
       dis: houseData.distance_to_work,
       tax: houseData.tax_rate,

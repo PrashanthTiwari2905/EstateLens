@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [formData, setFormData] = useState({
     crime_rate: 3.6,
     avg_rooms: 6.2,
+    sqft: 1500,
     house_age: 68.0,
     distance_to_work: 3.8,
     tax_rate: 408.0,
@@ -162,6 +163,7 @@ export default function Dashboard() {
                 <form onSubmit={handlePredict} className="space-y-8">
                   {Object.keys(formData).map((key) => {
                     const config = {
+                      sqft: { min: 400, max: 8000, step: 10, label: "Square Feet" },
                       crime_rate: { min: 0.0, max: 90.0, step: 0.1, label: "Crime Rate" },
                       avg_rooms: { min: 3.0, max: 9.0, step: 0.1, label: "Avg Rooms" },
                       house_age: { min: 0, max: 100, step: 1, label: "House Age" },
@@ -209,18 +211,49 @@ export default function Dashboard() {
                 {prediction ? (
                   <div className="animate-in zoom-in duration-300">
                     <div className="grid grid-cols-1 gap-4 mb-6">
-                      <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xl shadow-green-900/5 text-center">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Predicted Value</p>
-                        <h2 className="text-5xl font-black text-green-600">₹{prediction.predicted_price.toLocaleString()}</h2>
+                      <div className="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-200 border border-blue-500">
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <p className="text-blue-100 text-[10px] font-black uppercase tracking-widest mb-2">Estimated Property Price</p>
+                            <h2 className="text-5xl font-black tracking-tighter">
+                              {prediction.predicted_price >= 10000000 
+                                ? `₹${(prediction.predicted_price / 10000000).toFixed(2)} Crores` 
+                                : `₹${(prediction.predicted_price / 100000).toFixed(2)} Lakhs`}
+                            </h2>
+                          </div>
+                          <div className="bg-white/10 p-4 rounded-3xl backdrop-blur-md">
+                            <span className="text-2xl">💰</span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-10 pt-10 border-t border-white/10">
+                          <div>
+                            <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">Based on Area</p>
+                            <p className="text-xl font-bold">{formData.sqft} sq ft</p>
+                          </div>
+                          <div>
+                            <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">Price per Sq Ft</p>
+                            <p className="text-xl font-bold">₹{Math.round(prediction.predicted_price / formData.sqft).toLocaleString()}</p>
+                          </div>
+                        </div>
                       </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md">
                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Low Estimate</p>
-                          <p className="text-xl font-bold text-slate-700">₹{prediction.confidence_low.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-slate-700">
+                            {prediction.confidence_low >= 10000000 
+                              ? `₹${(prediction.confidence_low / 10000000).toFixed(2)} Cr` 
+                              : `₹${(prediction.confidence_low / 100000).toFixed(2)} L`}
+                          </p>
                         </div>
                         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md">
                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">High Estimate</p>
-                          <p className="text-xl font-bold text-slate-700">₹{prediction.confidence_high.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-slate-700">
+                            {prediction.confidence_high >= 10000000 
+                              ? `₹${(prediction.confidence_high / 10000000).toFixed(2)} Cr` 
+                              : `₹${(prediction.confidence_high / 100000).toFixed(2)} L`}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -307,7 +340,11 @@ export default function Dashboard() {
                           {new Date(record.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-8 py-6">
-                          <span className="text-lg font-black text-slate-900">₹{record.predicted_price.toLocaleString()}</span>
+                          <span className="text-lg font-black text-slate-900">
+                            {record.predicted_price >= 10000000 
+                              ? `₹${(record.predicted_price / 10000000).toFixed(2)} Cr` 
+                              : `₹${(record.predicted_price / 100000).toFixed(2)} L`}
+                          </span>
                         </td>
                         <td className="px-8 py-6">
                            <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${record.top_factors?.[0]?.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
