@@ -9,6 +9,7 @@ FEATURE_MAP = {
     'CHAS': 'River Proximity',
     'NOX': 'Nitric Oxide',
     'RM': 'Avg Rooms',
+    'SQFT': 'Square Feet',
     'AGE': 'Property Age',
     'DIS': 'Job Center Proximity',
     'RAD': 'Highway Access',
@@ -19,7 +20,7 @@ FEATURE_MAP = {
 }
 
 # The specific 7 features requested in train.py prompt
-SELECTED_FEATURES = ['Crime Rate', 'Avg Rooms', 'Property Age', 'Job Center Proximity', 'Tax Rate', 'Student-Teacher Ratio', 'Lower Status %']
+SELECTED_FEATURES = ['Crime Rate', 'Avg Rooms', 'Square Feet', 'Property Age', 'Job Center Proximity', 'Tax Rate', 'Student-Teacher Ratio', 'Lower Status %']
 
 def preprocess_input(data: dict) -> pd.DataFrame:
     """

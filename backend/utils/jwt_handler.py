@@ -15,8 +15,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", "your_super_secret_key_change_this")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
-# Passlib CryptContext for password hashing (uses bcrypt)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Passlib CryptContext for password hashing
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # OAuth2 context for extracting token from the 'Authorization' header
 # tokenUrl defines the endpoint that returns the token (used by Swagger UI)

@@ -15,6 +15,7 @@ FEATURES_PATH = os.path.join(os.path.dirname(__file__), "feature_names.pkl")
 FEATURE_MAP = {
     'crim': 'Crime Rate',
     'rm': 'Avg Rooms',
+    'sqft': 'Square Feet',
     'age': 'Property Age',
     'dis': 'Job Center Proximity',
     'tax': 'Tax Rate',

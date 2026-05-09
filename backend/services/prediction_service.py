@@ -25,6 +25,10 @@ class PredictionService:
             if not self.model:
                 return {"error": "Model not available"}
 
+        # Log incoming sqft
+        sqft = data.get('sqft', 'N/A')
+        print(f"DEBUG: Processing prediction for sqft={sqft}")
+
         # 1. Preprocess
         X = preprocess_input(data)
         

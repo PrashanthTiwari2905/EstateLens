@@ -4,6 +4,7 @@ from typing import List
 class HouseInput(BaseModel):
     crim: float
     rm: float
+    sqft: float
     age: float
     dis: float
     tax: float

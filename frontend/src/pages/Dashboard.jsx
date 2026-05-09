@@ -33,23 +33,37 @@ const Dashboard = () => {
   // Form State for 7 Features
   const [formData, setFormData] = useState({
     crim: 0.1,
-    rm: 6.0,
-    age: 60.0,
-    dis: 4.0,
+    rm: 6.5,
+    sqft: 1500,
+    age: 40.0,
+    dis: 5.0,
     tax: 300.0,
     ptratio: 18.0,
-    lstat: 12.0
+    lstat: 10.0
   });
 
   const featureLabels = [
-    { id: 'crim', label: 'Crime Rate', min: 0.0, max: 100.0, step: 0.1, desc: 'Per capita crime rate by town' },
+    { id: 'sqft', label: 'Square Feet', min: 400, max: 8000, step: 10, desc: 'Property area in sq ft (Key feature)' },
     { id: 'rm', label: 'Avg Rooms', min: 1.0, max: 10.0, step: 0.1, desc: 'Average number of rooms per dwelling' },
+    { id: 'crim', label: 'Crime Rate', min: 0.0, max: 100.0, step: 0.1, desc: 'Per capita crime rate by town' },
     { id: 'age', label: 'House Age', min: 1.0, max: 100.0, step: 1.0, desc: 'Proportion of built before 1940' },
     { id: 'dis', label: 'Distance to Work', min: 1.0, max: 30.0, step: 0.1, desc: 'Weighted distances to employment centers' },
     { id: 'tax', label: 'Tax Rate', min: 100.0, max: 1000.0, step: 1.0, desc: 'Full-value property-tax rate' },
     { id: 'ptratio', label: 'School Ratio', min: 10.0, max: 30.0, step: 0.1, desc: 'Pupil-teacher ratio by town' },
     { id: 'lstat', label: 'Low Income %', min: 1.0, max: 50.0, step: 0.1, desc: '% lower status of the population' },
   ];
+
+  const formatPriceINR = (value) => {
+    // Assuming value is in $1000s, convert to INR Lakhs
+    // 1 unit ($1000) approx ₹3.5 Lakhs to match user's example (1500sqft -> 75L)
+    const inrLakhs = value * 3.5;
+    if (inrLakhs >= 100) {
+      return `₹${(inrLakhs / 100).toFixed(2)} Crores`;
+    }
+    return `₹${inrLakhs.toFixed(2)} Lakhs`;
+  };
+
+  const getRawINR = (value) => value * 350000; // Raw INR value for calculations
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -203,25 +217,46 @@ const Dashboard = () => {
             <div className="space-y-8">
               {prediction ? (
                 <>
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <ResultCard 
-                      icon={<CurrencyDollarIcon className="w-5 h-5" />} 
-                      label="Point Estimate" 
-                      value={`$${prediction.predicted_price.toLocaleString()}k`} 
-                      color="blue"
-                    />
-                    <ResultCard 
-                      icon={<ScaleIcon className="w-5 h-5" />} 
-                      label="Low Range" 
-                      value={`$${prediction.confidence_range[0].toLocaleString()}k`}
-                      color="slate"
-                    />
-                    <ResultCard 
-                      icon={<ScaleIcon className="w-5 h-5" />} 
-                      label="High Range" 
-                      value={`$${prediction.confidence_range[1].toLocaleString()}k`}
-                      color="slate"
-                    />
+                  <div className="grid sm:grid-cols-1 gap-4">
+                    <div className="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-blue-200 border border-blue-500">
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <p className="text-blue-100 text-xs font-black uppercase tracking-[0.2em] mb-2">Estimated Property Price</p>
+                          <h2 className="text-5xl font-black tracking-tighter">
+                            {formatPriceINR(prediction.predicted_price)}
+                          </h2>
+                        </div>
+                        <div className="bg-white/10 p-4 rounded-3xl backdrop-blur-md">
+                          <CurrencyDollarIcon className="w-8 h-8 text-white" />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mt-10 pt-10 border-t border-white/10">
+                        <div>
+                          <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">Based on Area</p>
+                          <p className="text-xl font-bold">{formData.sqft} sq ft</p>
+                        </div>
+                        <div>
+                          <p className="text-blue-200 text-[10px] font-bold uppercase mb-1">Price per Sq Ft</p>
+                          <p className="text-xl font-bold">₹{Math.round(getRawINR(prediction.predicted_price) / formData.sqft).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <ResultCard 
+                        icon={<ScaleIcon className="w-5 h-5" />} 
+                        label="Lower Bound" 
+                        value={formatPriceINR(prediction.confidence_range[0])}
+                        color="white"
+                      />
+                      <ResultCard 
+                        icon={<ScaleIcon className="w-5 h-5" />} 
+                        label="Upper Bound" 
+                        value={formatPriceINR(prediction.confidence_range[1])}
+                        color="white"
+                      />
+                    </div>
                   </div>
 
                   <div className="bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 border border-slate-100">
@@ -320,7 +355,7 @@ const Dashboard = () => {
                         </td>
                         <td className="px-8 py-4">
                           <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">
-                            ${h.predicted_price.toLocaleString()}k
+                            {formatPriceINR(h.predicted_price)}
                           </span>
                         </td>
                         <td className="px-8 py-4">
